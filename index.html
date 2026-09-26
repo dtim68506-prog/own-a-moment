@@ -120,6 +120,8 @@
   }
   .hero-visual{position:absolute;inset:0;background:linear-gradient(180deg,#283a56 0%,#182233 55%,#0d1524 100%);transition:background 1s ease;}
   .hero-sky-svg{position:absolute;inset:0;width:100%;height:65%;bottom:0;top:auto;opacity:0.55;filter:blur(1.5px);transition:opacity .6s ease;}
+  .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s ease;}
+  .hero-photo.loaded{opacity:1;}
   .hero-bokeh{position:absolute;inset:0;overflow:hidden;filter:blur(30px);opacity:0.55;}
   .hero-bokeh span{position:absolute;border-radius:50%;background:var(--amber);opacity:0.35;}
   .hero-bokeh span:nth-child(1){width:180px;height:180px;left:8%;top:18%;background:var(--amber);animation:heroFloat1 22s ease-in-out infinite;}
@@ -525,6 +527,7 @@
 <section class="hero" id="top">
   <div class="hero-visual" id="heroVisual">
     <svg class="hero-sky-svg" id="heroSky" viewBox="0 0 400 170" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+    <img class="hero-photo" id="heroPhoto" src="" alt="" onerror="this.style.display='none'">
     <div class="hero-bokeh" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
     <div class="hero-grain" aria-hidden="true"></div>
     <div class="hero-vignette" aria-hidden="true"></div>
@@ -1209,6 +1212,7 @@
   // ---------- hero mood cycling ----------
   var heroVisual = document.getElementById('heroVisual');
   var heroSky = document.getElementById('heroSky');
+  var heroPhoto = document.getElementById('heroPhoto');
   var heroEyebrow = document.getElementById('heroEyebrow');
   var heroFeatures = [moments[1], moments[13], moments[16], moments[8], moments[9]].filter(Boolean);
   var heroIndex = 0;
@@ -1218,7 +1222,19 @@
     heroVisual.style.background = skyGradients[type] || skyGradients.rain;
     heroSky.innerHTML = skylines[m.city] || skylines._default;
     heroEyebrow.textContent = m.city.toUpperCase() + ' · ' + (typeLabels[type] || 'ДОЖДЬ');
+    heroPhoto.classList.remove('loaded');
+    var url = photoFor(m.city, type);
+    if(url){
+      heroPhoto.style.display = '';
+      heroPhoto.src = url;
+    } else {
+      heroPhoto.removeAttribute('src');
+      heroPhoto.style.display = 'none';
+    }
   }
+  heroPhoto.addEventListener('load', function(){
+    if(heroPhoto.getAttribute('src')) heroPhoto.classList.add('loaded');
+  });
   renderHero(0);
   document.getElementById('heroNext').addEventListener('click', function(){
     heroIndex = (heroIndex + 1) % heroFeatures.length;
